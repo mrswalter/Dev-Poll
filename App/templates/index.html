@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>DevOps Poll</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>🚀 DevOps Poll</h1>
+    <p>Which DevOps tool do you prefer most?</p>
+
+    <form id="pollForm">
+      <label><input type="radio" name="vote" value="Terraform" /> Terraform</label><br/>
+      <label><input type="radio" name="vote" value="Kubernetes" /> Kubernetes</label><br/>
+      <label><input type="radio" name="vote" value="Docker" /> Docker</label><br/><br/>
+      <button type="submit">Vote</button>
+    </form>
+
+    <h2>📊 Results</h2>
+    <div id="results"></div>
+  </div>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
