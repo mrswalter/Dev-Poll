@@ -1,7 +1,7 @@
 variable "app_image" {
   description = "Container image for the poll app"
   type        = string
-  default     = "514670561567.dkr.ecr.us-east-1.amazonaws.com/poll-app:latest" # you can override in tfvars
+  default     = "514670561567.dkr.ecr.us-east-1.amazonaws.com/dev-poll-app:latest" # you can override in tfvars
 }
 
 resource "aws_ecs_task_definition" "poll_app" {
