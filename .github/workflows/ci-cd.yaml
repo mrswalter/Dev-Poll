@@ -52,10 +52,10 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
-        run: cd terraform && terraform init
+        run: cd Poll && terraform init
 
       - name: Terraform Apply
-        run: cd terraform && terraform apply -auto-approve \
+        run: cd Poll && terraform apply -auto-approve \
           -var="app_image=${{ env.IMAGE_URI }}" \
           -var="db_password=${{ secrets.DB_PASSWORD }}"
 
@@ -78,9 +78,9 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
-        run: cd terraform && terraform init
+        run: cd Poll && terraform init
 
       - name: Terraform Destroy
-        run: cd terraform && terraform destroy -auto-approve \
+        run: cd Poll && terraform destroy -auto-approve \
           -var="db_password=${{ secrets.DB_PASSWORD }}"
           
