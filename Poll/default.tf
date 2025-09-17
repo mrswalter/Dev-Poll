@@ -3,7 +3,7 @@
 # -----------------------------
 variable "project_name" {
   description = "A name prefix for resources (helps keep names unique)."
-  default     = "devops-poll" # 🔹 Change if you want a different project prefix
+  default     = "devops-poll" # 🔹 Change if you want a different project name
 }
 
 variable "region" {
