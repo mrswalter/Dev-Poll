@@ -4,21 +4,43 @@ variable "aws_region" {
 }
 
 variable "project_name" {
-  type = string
-
+  type    = string
+  default = "devops_poll"
 }
 
 # VPC module outputs you’ll wire in:
 variable "vpc_id" {
-  type = string
+  type        = string
+  description = "The ID of the VPC to deploy resources into"
+}
+
+
+variable "vpc_cidr" {
+  description = "CIDR for VPC."
+  default     = "10.0.0.0/16"
+}
+
+variable "azs" {
+  description = "Availability Zones for subnets."
+  default     = ["us-east-1a", "us-east-1b"]
 }
 
 variable "public_subnet_ids" {
   type = list(string)
 }
 
+variable "public_subnet_cidrs" {
+  type    = list(string)
+  default = ["10.0.1.0/24", "10.0.2.0/24"]
+}
+
 variable "private_subnet_ids" {
   type = list(string)
+}
+
+variable "private_subnet_cidrs" {
+  type    = list(string)
+  default = ["10.0.101.0/24", "10.0.102.0/24"]
 }
 
 # App / ECS
@@ -32,10 +54,12 @@ variable "desired_count" {
   default = 2
 }
 
+
+
 # DB
 variable "db_engine" {
   type    = string
-  default = "mysql"
+  default = "mysql_poll"
 }
 
 variable "db_engine_version" {
@@ -60,7 +84,7 @@ variable "db_name" {
 
 variable "db_username" {
   type    = string
-  default = "admin"
+  default = "azwe"
 }
 
 variable "db_password" {
