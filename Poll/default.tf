@@ -16,7 +16,7 @@ variable "region" {
 # -----------------------------
 variable "app_image" {
   description = "Docker image for ECS service."
-  default     = 514670561567.dkr.ecr.us-east-1.amazonaws.com / dev-poll-app
+  default     = "514670561567.dkr.ecr.us-east-1.amazonaws.com/poll-app:latest"
   # 🔹 Replace with your actual ECR repo + tag
 }
 
