@@ -2,7 +2,7 @@
 # VPC
 # -----------------------------
 module "vpc" {
-  source               = "./../modules/vpc"
+  source               = "./Poll/modules/vpc"
   project_name         = var.project_name
   vpc_cidr             = var.vpc_cidr
   public_subnet_cidrs  = var.public_subnet_cidrs
@@ -14,7 +14,7 @@ module "vpc" {
 # Load Balancer (ALB)
 # -----------------------------
 module "load_balancer" {
-  source         = "./../modules/load_balancer"
+  source         = "./Poll/modules/load_balancer"
   project_name   = var.project_name
   vpc_id         = module.vpc.vpc_id
   public_subnets = module.vpc.public_subnets
@@ -24,7 +24,7 @@ module "load_balancer" {
 # ECS Cluster
 # -----------------------------
 module "ecs_cluster" {
-  source       = "./../modules/ecs_cluster"
+  source       = "./Poll/modules/ecs_cluster"
   project_name = var.project_name
 }
 
@@ -32,7 +32,7 @@ module "ecs_cluster" {
 # RDS (Postgres)
 # -----------------------------
 module "rds" {
-  source            = "./../modules/rds"
+  source            = "./Poll/modules/rds"
   project_name      = var.project_name
   vpc_id            = module.vpc.vpc_id
   private_subnets   = module.vpc.private_subnets
@@ -48,7 +48,7 @@ module "rds" {
 # ECS Service (App + Poll Backend)
 # -----------------------------
 module "ecs_service" {
-  source           = "./../modules/ecs_service"
+  source           = "./Poll/modules/ecs_service"
   project_name     = var.project_name
   cluster_id       = module.ecs_cluster.cluster_id
   target_group_arn = module.load_balancer.target_group_arn
