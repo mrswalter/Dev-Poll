@@ -55,8 +55,10 @@ jobs:
         run: cd Poll && terraform init
 
       - name: Terraform Apply
-        run: cd Poll && terraform apply -auto-approve \
-          -var="app_image=${{ env.IMAGE_URI }}" \
+        run: |
+         cd Poll 
+         terraform apply -auto-approve \
+          -var="image_uri=${{ env.IMAGE_URI }}" \
           -var="db_password=${{ secrets.DB_PASSWORD }}"
 
   destroy:
@@ -81,6 +83,8 @@ jobs:
         run: cd Poll && terraform init
 
       - name: Terraform Destroy
-        run: cd Poll && terraform destroy -auto-approve \
+        run: |
+          cd Poll 
+          terraform destroy -auto-approve \
           -var="db_password=${{ secrets.DB_PASSWORD }}"
           
