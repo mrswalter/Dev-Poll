@@ -56,20 +56,24 @@ variable "desired_count" {
 
 
 
-# DB
+# -----------------------------
+# Database (RDS MySQL)
+# -----------------------------
+
 variable "db_engine" {
   type    = string
-  default = "mysql_poll"
+  default = "MySQL_poll"
 }
 
 variable "db_engine_version" {
-  type    = string
-  default = "8.0"
+  description = "MySQL engine version."
+  default     = "8.0" # 🔹 Lock version for stability
 }
 
+
 variable "db_instance_class" {
-  type    = string
-  default = "db.t3.micro"
+  description = "RDS instance size."
+  default     = "db.t3.micro" # 🔹 Smallest cheap option, upgrade if prod
 }
 
 variable "db_allocated_storage" {
@@ -79,7 +83,7 @@ variable "db_allocated_storage" {
 
 variable "db_name" {
   type    = string
-  default = "polls"
+  default = "poll_db"
 }
 
 variable "db_username" {
@@ -88,6 +92,13 @@ variable "db_username" {
 }
 
 variable "db_password" {
-  type      = string
-  sensitive = true
+  description = "Master password for PostgreSQL (sensitive)."
+  sensitive   = true
+  type = string
+}
+
+variable "app_image" {
+  description = "Docker image for ECS service."
+  default     = "514670561567.dkr.ecr.us-east-1.amazonaws.com/poll-app:latest"
+  # 🔹 Replace with your actual ECR repo + tag
 }
