@@ -45,3 +45,5 @@ resource "aws_ecs_service" "this" {
 
   depends_on = [var.listener_arn]
 }
+
+

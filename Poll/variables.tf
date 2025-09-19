@@ -157,6 +157,7 @@ variable "target_group_arn" {
 variable "db_host" {
   type        = string
   description = "Hostname of the RDS instance"
+  #default     = "aws_db_instance.poll_db.address"
 }
 
 variable "db_user" {

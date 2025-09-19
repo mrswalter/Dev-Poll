@@ -50,7 +50,6 @@ module "rds" {
   db_allocated_storage = var.db_allocated_storage
   db_engine            = var.db_engine
   private_subnet_ids   = var.private_subnet_ids
-
 }
 
 # -----------------------------
@@ -71,4 +70,5 @@ module "ecs_service" {
   listener_arn       = module.load_balancer.listener_arn
   execution_role_arn = module.ecs_cluster.execution_role_arn
   task_role_arn      = module.ecs_cluster.task_role_arn
+  db_port            = module.rds.db_port
 }
