@@ -106,7 +106,7 @@ variable "app_image" {
 variable "alb_sg_id" {
   type        = string
   description = "Security Group ID for the ALB"
-  default     = "sg-0123456789abcdef0"
+  #default     = "sg-0123456789abcdef0"
 }
 
 variable "rds_sg_id" {
@@ -171,3 +171,10 @@ variable "db_port" {
   description = "Port for the RDS database"
   default     = 3306
 }
+
+# variable "container_port" {
+#   type        = number
+#   description = "Port the container listens on"
+#   default     = 8000
+# }
+
