@@ -56,23 +56,23 @@ module "rds" {
 # -----------------------------
 # ECS Service (App + Poll Backend)
 # -----------------------------
-module "ecs_service" {
-  source             = "./modules/ecs_service"
-  project_name       = var.project_name
-  target_group_arn   = module.load_balancer.target_group_arn
-  private_subnets    = module.vpc.private_subnets
-  app_image          = var.app_image
-  db_host            = module.rds.db_endpoint
-  db_name            = var.db_name
-  db_password        = var.db_password
-  ecs_sg_id          = module.vpc.ecs_sg_id
-  ecs_cluster_id     = module.ecs_cluster.cluster_id
-  db_user            = var.db_username
-  listener_arn       = module.load_balancer.listener_arn
-  execution_role_arn = module.ecs_cluster.execution_role_arn
-  task_role_arn      = module.ecs_cluster.task_role_arn
-  db_port            = module.rds.db_port
-}
+# module "ecs_service" {
+#   source             = "./modules/ecs_service"
+#   project_name       = var.project_name
+#   target_group_arn   = module.load_balancer.target_group_arn
+#   private_subnets    = module.vpc.private_subnets
+#   app_image          = var.app_image
+#   db_host            = module.rds.db_endpoint
+#   db_name            = var.db_name
+#   db_password        = var.db_password
+#   ecs_sg_id          = module.vpc.ecs_sg_id
+#   ecs_cluster_id     = module.ecs_cluster.cluster_id
+#   db_user            = var.db_username
+#   listener_arn       = module.load_balancer.listener_arn
+#   execution_role_arn = module.ecs_cluster.execution_role_arn
+#   task_role_arn      = module.ecs_cluster.task_role_arn
+#   db_port            = module.rds.db_port
+# }
 
 # -----------------------------
 # Security Groups
