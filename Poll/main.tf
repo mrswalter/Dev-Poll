@@ -16,11 +16,12 @@ module "vpc" {
 # Load Balancer (ALB)
 # -----------------------------
 module "alb" {
-  source         = "./modules/alb"
-  project_name   = var.project_name
-  vpc_id         = module.vpc.vpc_id
-  public_subnets = module.vpc.public_subnets
-  alb_sg_id      = module.security_groups.alb_sg_id
+  source       = "./modules/alb"
+  project_name = var.project_name
+  vpc_id       = module.vpc.vpc_id
+  subnet_ids   = module.vpc.public_subnets
+  alb_sg_id    = module.security_groups.alb_sg_id
+  app_port     = var.app_port
 }
 
 # -----------------------------
@@ -38,13 +39,13 @@ module "ecs_cluster" {
 # RDS (Postgres)
 # -----------------------------
 module "rds" {
-  source               = "./modules/rds"
-  project_name         = var.project_name
-  db_name              = var.db_name
-  db_username          = var.db_username
-  db_password          = var.db_password
-  db_instance_class    = var.db_instance_class
-  depends_on           = [module.vpc]
+  source            = "./modules/rds"
+  project_name      = var.project_name
+  db_name           = var.db_name
+  db_username       = var.db_username
+  db_password       = var.db_password
+  db_instance_class = var.db_instance_class
+  #depends_on           = [module.vpc]
   db_engine_version    = var.db_engine_version
   rds_sg_id            = module.vpc.rds_sg_id
   db_allocated_storage = var.db_allocated_storage
@@ -71,4 +72,16 @@ module "ecs_service" {
   execution_role_arn = module.ecs_cluster.execution_role_arn
   task_role_arn      = module.ecs_cluster.task_role_arn
   db_port            = module.rds.db_port
+}
+
+# -----------------------------
+# Security Groups
+# -----------------------------
+
+module "security_group" {
+  source       = "./modules/security_group"
+  project_name = var.project_name
+  vpc_id       = module.vpc.vpc_id
+  app_port     = var.app_port
+  db_port      = var.db_port
 }

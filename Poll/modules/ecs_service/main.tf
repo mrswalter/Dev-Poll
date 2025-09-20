@@ -16,7 +16,7 @@ resource "aws_ecs_task_definition" "this" {
       hostPort      = 80
     }]
     environment = [
-      { name = "DB_HOST", value = var.db_host },
+      { name = "DB_HOST", value = module.rds.db_host },
       { name = "DB_NAME", value = var.db_name },
       { name = "DB_USER", value = var.db_user },
       { name = "DB_PASSWORD", value = var.db_password }
@@ -34,7 +34,7 @@ resource "aws_ecs_service" "this" {
   network_configuration {
     subnets          = var.private_subnets
     security_groups  = [var.ecs_sg_id]
-    assign_public_ip = false
+    assign_public_ip = true
   }
 
   load_balancer {

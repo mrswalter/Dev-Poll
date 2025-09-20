@@ -6,7 +6,7 @@ variable "project_name" {
 variable "vpc_id" {
 
 }
-variable "public_subnets" {
+variable "subnet_ids" {
   type = list(string)
 }
 
@@ -15,8 +15,7 @@ variable "alb_sg_id" {
   type        = string
 }
 
-variable "account_id" {
-  description = "AWS Account ID"
-  type        = string
-  default     = "514670561567" #"999568710647"
+variable "app_port" {
+  description = "Port for the application (ECS tasks)."
+
 }
