@@ -1,6 +1,8 @@
+# ALB Security Group
+
 resource "aws_security_group" "alb_sg" {
   name        = "${var.project_name}-alb-sg"
-  description = "ALB SG"
+  description = "Allow HTTP/HTTPS inbound ALB SG"
   vpc_id      = var.vpc_id
 
   ingress {
@@ -19,14 +21,20 @@ resource "aws_security_group" "alb_sg" {
   }
   tags = { Name = "${var.project_name}-alb-sg" }
 }
+# output "alb_sg_id" {
+#   description = "Security group ID for the ALB"
+#   value       = aws_security_group.alb.id
+# }
+
+# ECS Security Group
 
 resource "aws_security_group" "ecs_sg" {
   name        = "${var.project_name}-ecs-sg"
-  description = "ECS tasks SG"
+  description = "Allow traffic from ALB"
   vpc_id      = var.vpc_id
 
   ingress {
-    description     = "App from ALB"
+    description     = "Allow traffic from ALB"
     from_port       = var.app_port
     to_port         = var.app_port
     protocol        = "tcp"
@@ -42,13 +50,15 @@ resource "aws_security_group" "ecs_sg" {
   tags = { Name = "${var.project_name}-ecs-sg" }
 }
 
+# RDS Security Group
+
 resource "aws_security_group" "rds_sg" {
   name        = "${var.project_name}-rds-sg"
-  description = "RDS SG"
+  description = "Allow DB access from ECS"
   vpc_id      = var.vpc_id
 
   ingress {
-    description     = "MySQL from ECS"
+    description     = "Allows MySQL from ECS"
     from_port       = var.db_port
     to_port         = var.db_port
     protocol        = "tcp"
@@ -63,3 +73,31 @@ resource "aws_security_group" "rds_sg" {
   }
   tags = { Name = "${var.project_name}-rds-sg" }
 }
+
+# resource "aws_security_group" "alb" {
+#   name        = "${var.project_name}-alb-sg"
+#   description = "Allow HTTP/HTTPS"
+#   vpc_id      = var.vpc_id
+
+#   ingress {
+#     from_port   = 80
+#     to_port     = 80
+#     protocol    = "tcp"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
+
+#   egress {
+#     from_port   = 0
+#     to_port     = 0
+#     protocol    = "-1"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
+# }
+
+# output "alb_sg_id" {
+#   value = aws_security_group.alb.id
+# }
+
+# # output "ecs_sg_id" {
+# #   value = aws_security_group.ecs_sg.id
+# # }

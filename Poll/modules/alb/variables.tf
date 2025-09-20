@@ -6,5 +6,16 @@ variable "project_name" {
 variable "vpc_id" {
 
 }
-variable "public_subnets" { type = list(string) }
-variable "alb_sg_id" {}
+variable "subnet_ids" {
+  type = list(string)
+}
+
+variable "alb_sg_id" {
+  description = "Security Group ID for the ALB."
+  type        = string
+}
+
+variable "app_port" {
+  description = "Port for the application (ECS tasks)."
+
+}

@@ -18,3 +18,7 @@ output "rds_port" {
   description = "RDS Port"
   value       = module.rds.port
 }
+
+output "alb_sg_id" {
+  value = aws_security_group.alb.id
+}
