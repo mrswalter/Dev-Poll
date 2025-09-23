@@ -27,7 +27,7 @@ resource "aws_lb_target_group" "this" {
 
 # Listener to forward traffic from ALB to target group
 resource "aws_lb_listener" "http" {
-  load_balancer_arn = aws_lb.http.arn
+  load_balancer_arn = aws_lb.this.arn
   port              = 80
   protocol          = "HTTP"
 
