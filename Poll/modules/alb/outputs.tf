@@ -7,7 +7,7 @@ output "alb_target_group_arn" {
 }
 
 output "listener_arn" {
-  value = aws_lb_listener.this.arn
+  value = aws_lb_listener.http.arn
 }
 
 output "alb_dns" {
