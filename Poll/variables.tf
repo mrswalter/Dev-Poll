@@ -66,7 +66,7 @@ variable "db_engine" {
 
 variable "db_engine_version" {
   description = "Postgres engine version."
-  default     = "15.4" # 🔹 Lock version for stability
+  default     = "15.2" # 🔹 Lock version for stability
 }
 
 
