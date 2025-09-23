@@ -22,6 +22,7 @@ resource "aws_ecs_task_definition" "this" {
       { name = "DB_PASSWORD", value = var.db_password }
     ]
   }])
+  depends_on = [aws_db_instance.this] # optional but explicit
 }
 
 resource "aws_ecs_service" "this" {

@@ -22,3 +22,5 @@ resource "aws_db_instance" "this" {
 
   tags = { Name = "${var.project_name}-rds" }
 }
+
+

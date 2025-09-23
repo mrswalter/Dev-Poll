@@ -122,64 +122,6 @@ GitHub Secrets → Credentials
 
 The real structure of this Project
 
-C:.
-│   .gitignore
-│   CHECKLIST.MD
-│   Dockerfile
-│   Project_structure.md
-│   README.md
-│   requirements.txt
-│   
-├───.github
-│   └───workflows
-│           ci-cd.yaml
-│
-├───app
-│   │   poll.py
-│   │
-│   ├───statics
-│   │       script.js
-│   │       style.css
-│   │
-│   └───templates
-│           index.html
-│
-└───Poll
-    │   backend.tf
-    │   ecs_task.tf
-    │   locals.tf
-    │   main.tf
-    │   outputs.tf
-    │   provider.tf
-    │   variables.tf
-    │
-    └───modules
-        ├───alb
-        │       main.tf
-        │       outputs.tf
-        │       variables.tf
-        │
-        ├───ecs_cluster
-        │       main.tf
-        │       outputs.tf
-        │       variable.tf
-        │
-        ├───ecs_service
-        │       main.tf
-        │       outputs.tf
-        │       variables.tf
-        │
-        ├───rds
-        │       main.tf
-        │       outputs.tf
-        │       variables.tf
-        │
-        ├───security_group
-        │       main.tf
-        │       outputs.tf
-        │       variables.tf
-        │
-        └───vpc
-                main.tf
-                outputs.tf
-                variables.tf
+output "endpoint" { value = aws_db_instance.this.address }
+output "db_port" { value = aws_db_instance.this.port }
+output "db_host" { value = aws_db_instance.this.address }
