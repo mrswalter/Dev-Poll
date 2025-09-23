@@ -118,3 +118,10 @@ Dockerfile → App files and port
 README.md → Documentation
 GitHub Secrets → Credentials
 
+
+
+The real structure of this Project
+
+output "endpoint" { value = aws_db_instance.this.address }
+output "db_port" { value = aws_db_instance.this.port }
+output "db_host" { value = aws_db_instance.this.address }

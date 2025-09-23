@@ -22,6 +22,7 @@ resource "aws_ecs_task_definition" "this" {
       { name = "DB_PASSWORD", value = var.db_password }
     ]
   }])
+  #depends_on = [aws_db_instance.this] # optional but explicit
 }
 
 resource "aws_ecs_service" "this" {
@@ -34,7 +35,7 @@ resource "aws_ecs_service" "this" {
   network_configuration {
     subnets          = var.private_subnets
     security_groups  = [var.ecs_sg_id]
-    assign_public_ip = false
+    assign_public_ip = true
   }
 
   load_balancer {
@@ -45,3 +46,5 @@ resource "aws_ecs_service" "this" {
 
   depends_on = [var.listener_arn]
 }
+
+
