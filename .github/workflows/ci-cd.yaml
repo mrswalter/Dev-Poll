@@ -67,6 +67,7 @@ jobs:
           cd ${{ env.TERRAFORM_DIR }}
           terraform plan \
             -var="db_password=${{ secrets.DB_PASSWORD }}" \
+            -var="execution_role_arn=${{ secrets.EXECUTION_ROLE_ARN }}" \
             -out=tfplan
 
       - name: Upload Terraform Plan Artifact
@@ -112,4 +113,5 @@ jobs:
         run: |
           cd ${{ env.TERRAFORM_DIR }}
           terraform destroy -auto-approve \
-            -var="db_password=${{ secrets.DB_PASSWORD }}"
+            -var="db_password=${{ secrets.DB_PASSWORD }}" \
+            -var="execution_role_arn=${{ secrets.EXECUTION_ROLE_ARN }}"
