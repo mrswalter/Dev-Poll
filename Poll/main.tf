@@ -82,7 +82,7 @@ module "ecs_service" {
   db_port          = module.rds.db_port
   ecs_sg_id        = module.security_group.ecs_sg_id
   ecs_cluster_id   = module.ecs_cluster.ecs_cluster_id
-  #execution_role_arn = var.execution_role_arn
+  #db_host = module.rds.db_host
   #task_role_arn = var.task_role_arn
   execution_role_arn = module.iam.execution_role_arn
   task_role_arn      = module.iam.task_role_arn

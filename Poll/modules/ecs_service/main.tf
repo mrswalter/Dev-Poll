@@ -16,13 +16,13 @@ resource "aws_ecs_task_definition" "this" {
       hostPort      = 80
     }]
     environment = [
-      { name = "DB_HOST", value = module.rds.db_host },
+      { name = "DB_HOST", value = var.db_host },
       { name = "DB_NAME", value = var.db_name },
       { name = "DB_USER", value = var.db_user },
       { name = "DB_PASSWORD", value = var.db_password }
     ]
   }])
-  depends_on = [aws_db_instance.this] # optional but explicit
+  #depends_on = [aws_db_instance.this] # optional but explicit
 }
 
 resource "aws_ecs_service" "this" {
