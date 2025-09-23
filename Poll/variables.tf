@@ -82,7 +82,7 @@ variable "db_allocated_storage" {
 
 variable "db_name" {
   type    = string
-  default = "devops-poll-db"
+  default = "devopspolldb"
 }
 
 variable "db_username" {
