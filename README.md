@@ -95,3 +95,86 @@ Prevents accidental leakage of keys.
 ✅ So yes:
 
 The poll.py backend + RDS are integrated with security best practices applied (private networking, secrets management, IAM least privilege, security groups, encrypted backend, and CI/CD secrets protection).
+
+#########################
+#After build procedures#
+#########################
+
+Where to Look in AWS Console
+🔹 Amazon ECS
+Go to ECS > Clusters
+
+Look for a cluster named something like devops-poll-cluster
+
+Inside, check:
+
+Services → your running service
+
+Tasks → active containers
+
+Task Definitions → verify your image and roles
+
+🔹 Elastic Load Balancing (ALB)
+Go to EC2 > Load Balancers
+
+Look for an ALB named poll-alb or similar
+
+Check:
+
+DNS name (should match your alb_dns output)
+
+Listeners and Target Groups → confirm routing to ECS
+
+🔹 Amazon RDS
+Go to RDS > Databases
+
+Look for devops-poll-db
+
+Check:
+
+Endpoint (should match your db_host output)
+
+Connectivity & security → subnet group, security group, etc.
+
+🔹 IAM Roles
+Go to IAM > Roles
+
+Look for:
+
+devops-poll-ecs-execution-role
+
+devops-poll-ecs-task-role
+
+Confirm attached policies like AmazonECSTaskExecutionRolePolicy
+
+🔹 CloudWatch Logs
+Go to CloudWatch > Logs > Log groups
+
+Look for log groups tied to your ECS service or task definition
+
+🛠️ Optional: Use Terraform Outputs
+If you added outputs in your root outputs.tf, you can run:
+
+bash
+cd Poll
+terraform output
+This will show values like:
+
+alb_dns
+
+db_host
+
+cluster_name
+
+service_name
+
+🧪 Want to Test It?
+Try hitting your ALB DNS in the browser or with curl:
+
+bash
+curl http://<alb_dns>
+If everything’s wired correctly, you should see your app respond!
+
+
+
+
