@@ -94,3 +94,8 @@ module "iam" {
   source       = "./modules/iam"
   project_name = var.project_name
 }
+
+resource "aws_cloudwatch_log_group" "poll_app" {
+  name              = "/ecs/poll-app"
+  retention_in_days = 7
+}

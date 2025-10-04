@@ -8,23 +8,30 @@ resource "aws_ecs_task_definition" "this" {
   task_role_arn            = var.task_role_arn
 
   container_definitions = jsonencode([{
-    name      = "poll-app"
-    image     = var.app_image
-    essential = true
-    portMappings = [{
-      containerPort = 80
-      hostPort      = 80
-    }]
-    environment = [
-      { name = "DB_HOST", value = var.db_host },
-      { name = "DB_NAME", value = var.db_name },
-      { name = "DB_USER", value = var.db_user },
-      { name = "DB_PASSWORD", value = var.db_password }
-    ]
-  }])
-  #depends_on = [aws_db_instance.this] # optional but explicit
-}
+  name      = "poll-app"
+  image     = var.app_image
+  essential = true
+  portMappings = [{
+    containerPort = 80
+    hostPort      = 80
+  }]
+  environment = [
+    { name = "DB_HOST", value = var.db_host },
+    { name = "DB_NAME", value = var.db_name },
+    { name = "DB_USER", value = var.db_user },
+    { name = "DB_PASSWORD", value = var.db_password }
+  ]
+  logConfiguration = {
+    logDriver = "awslogs"
+    options = {
+      awslogs-group         = "/ecs/poll-app"
+      awslogs-region        = "us-east-1"
+      awslogs-stream-prefix = "ecs"
+    }
+  }
+}])
 
+}
 resource "aws_ecs_service" "this" {
   name            = "${var.project_name}-service"
   cluster         = var.ecs_cluster_id
@@ -46,5 +53,4 @@ resource "aws_ecs_service" "this" {
 
   depends_on = [var.listener_arn]
 }
-
 
