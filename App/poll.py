@@ -1,6 +1,7 @@
 import os
 from flask import Flask, request, jsonify, render_template
-import pymysql
+import psycopg2
+
 
 DB_HOST = os.getenv("DB_HOST")
 DB_USER = os.getenv("DB_USER")
@@ -10,9 +11,9 @@ DB_NAME = os.getenv("DB_NAME", "polls")
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
 def get_conn():
-    return pymysql.connect(
+    return psycopg2.connect(
         host=DB_HOST, user=DB_USER, password=DB_PASS, database=DB_NAME,
-        cursorclass=pymysql.cursors.Cursor, autocommit=True
+        cursorclass=psycopg2.cursors.Cursor, autocommit=True
     )
 
 def init_db():
