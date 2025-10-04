@@ -2,24 +2,27 @@ import os
 from flask import Flask, request, jsonify, render_template
 import psycopg2
 
-
 DB_HOST = os.getenv("DB_HOST")
 DB_USER = os.getenv("DB_USER")
 DB_PASS = os.getenv("DB_PASS")
 DB_NAME = os.getenv("DB_NAME", "polls")
 
-app = Flask(__name__, template_folder="templates", static_folder="static")
+app = Flask(__name__, template_folder="templates", static_folder="statics")
 
 def get_conn():
-    return psycopg2.connect(
-        host=DB_HOST, user=DB_USER, password=DB_PASS, database=DB_NAME,
-        cursorclass=psycopg2.cursors.Cursor, autocommit=True
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        user=DB_USER,
+        password=DB_PASS,
+        dbname=DB_NAME
     )
+    conn.autocommit = True
+    return conn
 
 def init_db():
     sql = """
     CREATE TABLE IF NOT EXISTS votes (
-      id BIGINT AUTO_INCREMENT PRIMARY KEY,
+      id BIGSERIAL PRIMARY KEY,
       choice VARCHAR(64) NOT NULL,
       voted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
@@ -58,9 +61,11 @@ def health():
             with conn.cursor() as cur:
                 cur.execute("SELECT 1")
         return "OK", 200
-    except Exception:
+    except Exception as e:
+        print(f"Health check failed: {e}")
         return "DB ERROR", 500
 
 if __name__ == "__main__":
     init_db()
     app.run(host="0.0.0.0", port=8000)
+
