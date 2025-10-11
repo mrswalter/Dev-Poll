@@ -126,3 +126,4 @@ jobs:
             -var="grafana_admin_password=${{ secrets.GRAFANA_ADMIN_PASSWORD }}" \
             -var="grafana_image=grafana/grafana:latest" \
             -var="ecs_cluster_id=${{ secrets.ECS_CLUSTER_ID }}"
+
