@@ -54,10 +54,16 @@ resource "aws_iam_role_policy" "task_policy" {
           "rds:DescribeDBInstances",
           "ssm:GetParameters",
           "logs:CreateLogStream",
-          "logs:PutLogEvents"
+          "logs:PutLogEvents",
+          "logs:DescribeLogGroups",
+          "logs:GetLogEvents",
+          "cloudwatch:GetMetricData",
+          "cloudwatch:ListMetrics",
+          "cloudwatch:GetDashboard"
         ],
         Resource = "*"
       }
     ]
   })
 }
+

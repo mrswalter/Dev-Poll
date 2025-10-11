@@ -8,28 +8,28 @@ resource "aws_ecs_task_definition" "this" {
   task_role_arn            = var.task_role_arn
 
   container_definitions = jsonencode([{
-  name      = "poll-app"
-  image     = var.app_image
-  essential = true
-  portMappings = [{
-    containerPort = 80
-    hostPort      = 80
-  }]
-  environment = [
-    { name = "DB_HOST", value = var.db_host },
-    { name = "DB_NAME", value = var.db_name },
-    { name = "DB_USER", value = var.db_user },
-    { name = "DB_PASSWORD", value = var.db_password }
-  ]
-  logConfiguration = {
-    logDriver = "awslogs"
-    options = {
-      awslogs-group         = "/ecs/poll-app"
-      awslogs-region        = "us-east-1"
-      awslogs-stream-prefix = "ecs"
+    name      = "poll-app"
+    image     = var.app_image
+    essential = true
+    portMappings = [{
+      containerPort = 80
+      hostPort      = 80
+    }]
+    environment = [
+      { name = "DB_HOST", value = var.db_host },
+      { name = "DB_NAME", value = var.db_name },
+      { name = "DB_USER", value = var.db_user },
+      { name = "DB_PASSWORD", value = var.db_password }
+    ]
+    logConfiguration = {
+      logDriver = "awslogs"
+      options = {
+        awslogs-group         = "/ecs/poll-app"
+        awslogs-region        = "us-east-1"
+        awslogs-stream-prefix = "ecs"
+      }
     }
-  }
-}])
+  }])
 
 }
 resource "aws_ecs_service" "this" {
@@ -53,4 +53,15 @@ resource "aws_ecs_service" "this" {
 
   depends_on = [var.listener_arn]
 }
+
+# resource "aws_ecs_service" "grafana" {
+#   name = "grafana"
+#   load_balancers = [
+#     {
+#       target_group_arn = module.alb.grafana_tg_arn
+#       container_name   = "grafana"
+#       container_port   = 3000
+#     }
+#   ]
+# }
 

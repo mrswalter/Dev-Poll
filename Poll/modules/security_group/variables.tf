@@ -18,4 +18,6 @@ variable "lb_ingress_cidrs" {
   default = ["0.0.0.0/0"]
 }
 
-
+variable "private_subnet_cidrs" {
+  type = list(string)
+}
