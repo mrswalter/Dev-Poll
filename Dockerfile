@@ -3,17 +3,20 @@ FROM python:3.11-slim
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
+RUN apt-get update && apt-get install -y gcc libpq-dev
+
 WORKDIR /app
+
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN ["pip", "install", "--no-cache-dir", "-r", "requirements.txt"]
 
 COPY . /app/
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
 
 EXPOSE 8000
+
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD curl -fsS http://127.0.0.1:8000/health || exit 1
 
-# Initialize table on boot then run gunicorn
-CMD python -c "import app.poll as poll; poll.init_db()" && \
-   gunicorn -w 4 -b 0.0.0.0:8000 poll:app
-
+CMD ["/start.sh"]
 
