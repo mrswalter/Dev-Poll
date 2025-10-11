@@ -22,6 +22,7 @@ module "security_group" {
   vpc_id       = module.vpc.vpc_id
   app_port     = var.app_port
   #db_port      = var.db_port
+  private_subnet_cidrs = var.private_subnet_cidrs
 }
 
 # -----------------------------
@@ -34,6 +35,7 @@ module "alb" {
   subnet_ids   = module.vpc.public_subnets
   alb_sg_id    = module.security_group.alb_sg_id
   app_port     = var.app_port
+  alb_arn      = module.alb.alb_arn
 }
 
 # -----------------------------
@@ -45,6 +47,7 @@ module "ecs_cluster" {
   vpc_id             = module.vpc.vpc_id
   public_subnet_ids  = module.vpc.public_subnets
   private_subnet_ids = module.vpc.private_subnets
+  depends_on         = [module.vpc]
 }
 
 # -----------------------------
@@ -99,3 +102,35 @@ resource "aws_cloudwatch_log_group" "poll_app" {
   name              = "/ecs/poll-app"
   retention_in_days = 7
 }
+
+module "efs" {
+  source              = "./modules/efs"
+  private_subnets_map = module.vpc.private_subnets_map
+  efs_sg_id           = module.security_group.efs_sg_id
+}
+
+module "prometheus" {
+  source             = "./modules/monitoring/prometheus"
+  ecs_cluster_id     = module.ecs_cluster.ecs_cluster_id
+  private_subnets    = module.vpc.private_subnets
+  prometheus_efs_id  = module.efs.prometheus_efs_id
+  prometheus_sg_id   = module.security_group.prometheus_sg_id
+  execution_role_arn = module.iam.execution_role_arn
+  task_role_arn      = module.iam.task_role_arn
+}
+
+module "grafana" {
+  source             = "./modules/monitoring/grafana"
+  ecs_cluster_id     = module.ecs_cluster.ecs_cluster_id
+  private_subnets    = module.vpc.private_subnets
+  grafana_sg_id      = module.security_group.grafana_sg_id
+  execution_role_arn = module.iam.execution_role_arn
+  task_role_arn      = module.iam.task_role_arn
+  grafana_image      = "grafana/grafana:latest"
+  #grafana_admin_password = "admin"
+  #aws_lb_listener        = module.alb.listener_arn
+  target_group_arn = module.alb.grafana_tg_arn
+}
+
+
+

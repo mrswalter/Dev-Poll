@@ -14,5 +14,6 @@ HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD curl -fsS http://127.0.0
 
 # Initialize table on boot then run gunicorn
 CMD python -c "import app.poll as poll; poll.init_db()" && \
-    gunicorn -b 0.0.0.0:8000 app.poll:app
+   gunicorn -w 4 -b 0.0.0.0:8000 poll:app
+
 

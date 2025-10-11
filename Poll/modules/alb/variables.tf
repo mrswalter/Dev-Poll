@@ -20,3 +20,8 @@ variable "app_port" {
   description = "Port for the application (ECS tasks)."
 
 }
+
+variable "alb_arn" {
+  description = "value of the ALB ARN."
+
+}

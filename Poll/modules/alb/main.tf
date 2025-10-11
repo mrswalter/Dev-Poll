@@ -37,3 +37,35 @@ resource "aws_lb_listener" "http" {
   }
 }
 
+resource "aws_lb_listener" "grafana" {
+  load_balancer_arn = var.alb_arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.grafana.arn
+  }
+}
+
+resource "aws_lb_target_group" "grafana" {
+  name        = "grafana-tg"
+  port        = 3000
+  protocol    = "HTTP"
+  target_type = "ip"
+  vpc_id      = var.vpc_id
+
+  health_check {
+    path                = "/login"
+    protocol            = "HTTP"
+    matcher             = "200"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+  }
+}
+
+output "alb_arn" {
+  value = aws_lb.this.arn
+}
