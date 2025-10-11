@@ -71,6 +71,10 @@ jobs:
             -var="db_password=${{ secrets.DB_PASSWORD }}" \
             -var="execution_role_arn=${{ secrets.EXECUTION_ROLE_ARN }}" \
             -var="task_role_arn=${{ secrets.TASK_ROLE_ARN }}" \
+            -var="app_image=${{ env.IMAGE_URI }}" \
+            -var="grafana_admin_password=${{ secrets.GRAFANA_ADMIN_PASSWORD }}" \
+            -var="grafana_image=grafana/grafana:latest" \
+            -var="ecs_cluster_id=${{ secrets.ECS_CLUSTER_ID }}" \
             -out=tfplan
 
       - name: Upload Terraform Plan Artifact
@@ -118,4 +122,7 @@ jobs:
           terraform destroy -auto-approve \
             -var="db_password=${{ secrets.DB_PASSWORD }}" \
             -var="execution_role_arn=${{ secrets.EXECUTION_ROLE_ARN }}" \
-            -var="task_role_arn=${{ secrets.TASK_ROLE_ARN }}"
+            -var="task_role_arn=${{ secrets.TASK_ROLE_ARN }}" \
+            -var="grafana_admin_password=${{ secrets.GRAFANA_ADMIN_PASSWORD }}" \
+            -var="grafana_image=grafana/grafana:latest" \
+            -var="ecs_cluster_id=${{ secrets.ECS_CLUSTER_ID }}"
