@@ -31,7 +31,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -44,7 +44,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build & Push Docker image
+      - name: Build & Push Docker image to ECR
         run: |
           IMAGE_URI=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
           echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
@@ -59,24 +59,21 @@ jobs:
           cd ${{ env.TERRAFORM_DIR }}
           terraform init
 
-      - name: Create terraform.auto.tfvars safely
+      - name: Select or Create Terraform Workspace
         run: |
           cd ${{ env.TERRAFORM_DIR }}
+          terraform workspace select default || terraform workspace new default
 
-          clean_value() {
-            echo "$1" | tr -d '\r\n' | sed 's/"/\\"/g'
-          }
-
-          printf 'db_password = "%s"\n'            "$(clean_value "${{ secrets.DB_PASSWORD }}")" > terraform.auto.tfvars
-          printf 'execution_role_arn = "%s"\n'     "$(clean_value "${{ secrets.EXECUTION_ROLE_ARN }}")" >> terraform.auto.tfvars
-          printf 'task_role_arn = "%s"\n'          "$(clean_value "${{ secrets.TASK_ROLE_ARN }}")" >> terraform.auto.tfvars
-          printf 'app_image = "%s"\n'              "$(clean_value "${{ env.IMAGE_URI }}")" >> terraform.auto.tfvars
-          printf 'grafana_admin_password = "%s"\n' "$(clean_value "${{ secrets.GRAFANA_ADMIN_PASSWORD }}")" >> terraform.auto.tfvars
-          printf 'grafana_image = "grafana/grafana:latest"\n' >> terraform.auto.tfvars
-          printf 'ecs_cluster_id = "%s"\n'         "$(clean_value "${{ secrets.ECS_CLUSTER_ID }}")" >> terraform.auto.tfvars
-
-          echo "✅ terraform.auto.tfvars created successfully."
-          cat terraform.auto.tfvars
+      - name: Generate terraform.auto.tfvars
+        run: |
+          cd ${{ env.TERRAFORM_DIR }}
+          echo "db_password            = \"${{ secrets.DB_PASSWORD }}\""            > terraform.auto.tfvars
+          echo "execution_role_arn     = \"${{ secrets.EXECUTION_ROLE_ARN }}\""    >> terraform.auto.tfvars
+          echo "task_role_arn          = \"${{ secrets.TASK_ROLE_ARN }}\""          >> terraform.auto.tfvars
+          echo "app_image              = \"${{ env.IMAGE_URI }}\""                  >> terraform.auto.tfvars
+          echo "grafana_admin_password = \"${{ secrets.GRAFANA_ADMIN_PASSWORD }}\"" >> terraform.auto.tfvars
+          echo "grafana_image          = \"grafana/grafana:latest\""                >> terraform.auto.tfvars
+          echo "ecs_cluster_id         = \"${{ secrets.ECS_CLUSTER_ID }}\""         >> terraform.auto.tfvars
 
       - name: Terraform Plan
         run: |
@@ -87,3 +84,48 @@ jobs:
         run: |
           cd ${{ env.TERRAFORM_DIR }}
           terraform apply -auto-approve tfplan
+
+  destroy:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: |
+          cd ${{ env.TERRAFORM_DIR }}
+          terraform init
+
+      - name: Select or Create Terraform Workspace
+        run: |
+          cd ${{ env.TERRAFORM_DIR }}
+          terraform workspace select default || terraform workspace new default
+
+      - name: Generate terraform.auto.tfvars
+        run: |
+          cd ${{ env.TERRAFORM_DIR }}
+          echo "db_password            = \"${{ secrets.DB_PASSWORD }}\""            > terraform.auto.tfvars
+          echo "execution_role_arn     = \"${{ secrets.EXECUTION_ROLE_ARN }}\""    >> terraform.auto.tfvars
+          echo "task_role_arn          = \"${{ secrets.TASK_ROLE_ARN }}\""          >> terraform.auto.tfvars
+          echo "app_image              = \"${{ env.IMAGE_URI }}\""                  >> terraform.auto.tfvars
+          echo "grafana_admin_password = \"${{ secrets.GRAFANA_ADMIN_PASSWORD }}\"" >> terraform.auto.tfvars
+          echo "grafana_image          = \"grafana/grafana:latest\""                >> terraform.auto.tfvars
+          echo "ecs_cluster_id         = \"${{ secrets.ECS_CLUSTER_ID }}\""         >> terraform.auto.tfvars
+
+      - name: Terraform Destroy
+        run: |
+          cd ${{ env.TERRAFORM_DIR }}
+          terraform destroy -auto-approve
+
