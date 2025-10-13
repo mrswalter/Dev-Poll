@@ -59,18 +59,25 @@ jobs:
           cd ${{ env.TERRAFORM_DIR }}
           terraform init
 
-      - name: Prepare Terraform Variables
+      - name: Prepare Terraform Variables (sanitize secrets)
         run: |
           cd ${{ env.TERRAFORM_DIR }}
-          cat > terraform.auto.tfvars <<EOF
-          db_password            = "${{ secrets.DB_PASSWORD }}"
-          execution_role_arn     = "${{ secrets.EXECUTION_ROLE_ARN }}"
-          task_role_arn          = "${{ secrets.TASK_ROLE_ARN }}"
-          app_image              = "${{ env.IMAGE_URI }}"
-          grafana_admin_password = "${{ secrets.GRAFANA_ADMIN_PASSWORD }}"
-          grafana_image          = "grafana/grafana:latest"
-          ecs_cluster_id         = "${{ secrets.ECS_CLUSTER_ID }}"
-          EOF
+
+          clean_value() {
+            # Remove line breaks and carriage returns from secrets
+            echo "$1" | tr -d '\r' | tr -d '\n'
+          }
+
+          echo "db_password            = \"$(clean_value "${{ secrets.DB_PASSWORD }}")\"" > terraform.auto.tfvars
+          echo "execution_role_arn     = \"$(clean_value "${{ secrets.EXECUTION_ROLE_ARN }}")\"" >> terraform.auto.tfvars
+          echo "task_role_arn          = \"$(clean_value "${{ secrets.TASK_ROLE_ARN }}")\"" >> terraform.auto.tfvars
+          echo "app_image              = \"$(clean_value "${{ env.IMAGE_URI }}")\"" >> terraform.auto.tfvars
+          echo "grafana_admin_password = \"$(clean_value "${{ secrets.GRAFANA_ADMIN_PASSWORD }}")\"" >> terraform.auto.tfvars
+          echo "grafana_image          = \"grafana/grafana:latest\"" >> terraform.auto.tfvars
+          echo "ecs_cluster_id         = \"$(clean_value "${{ secrets.ECS_CLUSTER_ID }}")\"" >> terraform.auto.tfvars
+
+          echo "✅ terraform.auto.tfvars file created successfully."
+          cat terraform.auto.tfvars
 
       - name: Terraform Plan
         run: |
@@ -111,19 +118,25 @@ jobs:
           cd ${{ env.TERRAFORM_DIR }}
           terraform init
 
-      - name: Prepare Terraform Variables
+      - name: Prepare Terraform Variables (sanitize secrets)
         run: |
           cd ${{ env.TERRAFORM_DIR }}
-          cat > terraform.auto.tfvars <<EOF
-          db_password            = "${{ secrets.DB_PASSWORD }}"
-          execution_role_arn     = "${{ secrets.EXECUTION_ROLE_ARN }}"
-          task_role_arn          = "${{ secrets.TASK_ROLE_ARN }}"
-          grafana_admin_password = "${{ secrets.GRAFANA_ADMIN_PASSWORD }}"
-          grafana_image          = "grafana/grafana:latest"
-          ecs_cluster_id         = "${{ secrets.ECS_CLUSTER_ID }}"
-          EOF
+
+          clean_value() {
+            echo "$1" | tr -d '\r' | tr -d '\n'
+          }
+
+          echo "db_password            = \"$(clean_value "${{ secrets.DB_PASSWORD }}")\"" > terraform.auto.tfvars
+          echo "execution_role_arn     = \"$(clean_value "${{ secrets.EXECUTION_ROLE_ARN }}")\"" >> terraform.auto.tfvars
+          echo "task_role_arn          = \"$(clean_value "${{ secrets.TASK_ROLE_ARN }}")\"" >> terraform.auto.tfvars
+          echo "grafana_admin_password = \"$(clean_value "${{ secrets.GRAFANA_ADMIN_PASSWORD }}")\"" >> terraform.auto.tfvars
+          echo "grafana_image          = \"grafana/grafana:latest\"" >> terraform.auto.tfvars
+          echo "ecs_cluster_id         = \"$(clean_value "${{ secrets.ECS_CLUSTER_ID }}")\"" >> terraform.auto.tfvars
 
       - name: Terraform Destroy
         run: |
+          cd ${{ env.TERRAFORM_DIR }}
+          terraform destroy -auto-approve
+
           cd ${{ env.TERRAFORM_DIR }}
           terraform destroy -auto-approve
