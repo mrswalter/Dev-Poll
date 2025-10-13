@@ -67,13 +67,25 @@ jobs:
       - name: Generate terraform.auto.tfvars
         run: |
           cd ${{ env.TERRAFORM_DIR }}
-          echo "db_password            = \"${{ secrets.DB_PASSWORD }}\""            > terraform.auto.tfvars
-          echo "execution_role_arn     = \"${{ secrets.EXECUTION_ROLE_ARN }}\""    >> terraform.auto.tfvars
-          echo "task_role_arn          = \"${{ secrets.TASK_ROLE_ARN }}\""          >> terraform.auto.tfvars
-          echo "app_image              = \"${{ env.IMAGE_URI }}\""                  >> terraform.auto.tfvars
-          echo "grafana_admin_password = \"${{ secrets.GRAFANA_ADMIN_PASSWORD }}\"" >> terraform.auto.tfvars
-          echo "grafana_image          = \"grafana/grafana:latest\""                >> terraform.auto.tfvars
-          echo "ecs_cluster_id         = \"${{ secrets.ECS_CLUSTER_ID }}\""         >> terraform.auto.tfvars
+          cat <<EOF > terraform.auto.tfvars
+db_password = <<EOP
+${{ secrets.DB_PASSWORD }}
+EOP
+execution_role_arn = <<EOP
+${{ secrets.EXECUTION_ROLE_ARN }}
+EOP
+task_role_arn = <<EOP
+${{ secrets.TASK_ROLE_ARN }}
+EOP
+app_image = "${{ env.IMAGE_URI }}"
+grafana_admin_password = <<EOP
+${{ secrets.GRAFANA_ADMIN_PASSWORD }}
+EOP
+grafana_image = "grafana/grafana:latest"
+ecs_cluster_id = <<EOP
+${{ secrets.ECS_CLUSTER_ID }}
+EOP
+EOF
 
       - name: Terraform Plan
         run: |
@@ -116,13 +128,25 @@ jobs:
       - name: Generate terraform.auto.tfvars
         run: |
           cd ${{ env.TERRAFORM_DIR }}
-          echo "db_password            = \"${{ secrets.DB_PASSWORD }}\""            > terraform.auto.tfvars
-          echo "execution_role_arn     = \"${{ secrets.EXECUTION_ROLE_ARN }}\""    >> terraform.auto.tfvars
-          echo "task_role_arn          = \"${{ secrets.TASK_ROLE_ARN }}\""          >> terraform.auto.tfvars
-          echo "app_image              = \"${{ env.IMAGE_URI }}\""                  >> terraform.auto.tfvars
-          echo "grafana_admin_password = \"${{ secrets.GRAFANA_ADMIN_PASSWORD }}\"" >> terraform.auto.tfvars
-          echo "grafana_image          = \"grafana/grafana:latest\""                >> terraform.auto.tfvars
-          echo "ecs_cluster_id         = \"${{ secrets.ECS_CLUSTER_ID }}\""         >> terraform.auto.tfvars
+          cat <<EOF > terraform.auto.tfvars
+db_password = <<EOP
+${{ secrets.DB_PASSWORD }}
+EOP
+execution_role_arn = <<EOP
+${{ secrets.EXECUTION_ROLE_ARN }}
+EOP
+task_role_arn = <<EOP
+${{ secrets.TASK_ROLE_ARN }}
+EOP
+app_image = "${{ env.IMAGE_URI }}"
+grafana_admin_password = <<EOP
+${{ secrets.GRAFANA_ADMIN_PASSWORD }}
+EOP
+grafana_image = "grafana/grafana:latest"
+ecs_cluster_id = <<EOP
+${{ secrets.ECS_CLUSTER_ID }}
+EOP
+EOF
 
       - name: Terraform Destroy
         run: |
