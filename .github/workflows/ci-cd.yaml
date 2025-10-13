@@ -1,4 +1,6 @@
-name: Terraform Deploy
+
+
+# Terraform Deploy
 
 on:
   push:
@@ -64,33 +66,24 @@ jobs:
           cd ${{ env.TERRAFORM_DIR }}
           terraform workspace select default || terraform workspace new default
 
-      - name: Generate terraform.auto.tfvars
-        run: |
-          cd ${{ env.TERRAFORM_DIR }}
-          cat <<EOF > terraform.auto.tfvars
-db_password = <<EOP
-${{ secrets.DB_PASSWORD }}
-EOP
-execution_role_arn = <<EOP
-${{ secrets.EXECUTION_ROLE_ARN }}
-EOP
-task_role_arn = <<EOP
-${{ secrets.TASK_ROLE_ARN }}
-EOP
-app_image = "${{ env.IMAGE_URI }}"
-grafana_admin_password = <<EOP
-${{ secrets.GRAFANA_ADMIN_PASSWORD }}
-EOP
-grafana_image = "grafana/grafana:latest"
-ecs_cluster_id = <<EOP
-${{ secrets.ECS_CLUSTER_ID }}
-EOP
-EOF
-
       - name: Terraform Plan
         run: |
           cd ${{ env.TERRAFORM_DIR }}
-          terraform plan -out=tfplan
+          terraform plan \
+            -var="db_password=${{ secrets.DB_PASSWORD }}" \
+            -var="execution_role_arn=${{ secrets.EXECUTION_ROLE_ARN }}" \
+            -var="task_role_arn=${{ secrets.TASK_ROLE_ARN }}" \
+            -var="app_image=${{ env.IMAGE_URI }}" \
+            -var="grafana_admin_password=${{ secrets.GRAFANA_ADMIN_PASSWORD }}" \
+            -var="grafana_image=grafana/grafana:latest" \
+            -var="ecs_cluster_id=${{ secrets.ECS_CLUSTER_ID }}" \
+            -out=tfplan
+
+      - name: Upload Terraform Plan Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan
+          path: ${{ env.TERRAFORM_DIR }}/tfplan
 
       - name: Terraform Apply
         run: |
@@ -125,31 +118,14 @@ EOF
           cd ${{ env.TERRAFORM_DIR }}
           terraform workspace select default || terraform workspace new default
 
-      - name: Generate terraform.auto.tfvars
-        run: |
-          cd ${{ env.TERRAFORM_DIR }}
-          cat <<EOF > terraform.auto.tfvars
-db_password = <<EOP
-${{ secrets.DB_PASSWORD }}
-EOP
-execution_role_arn = <<EOP
-${{ secrets.EXECUTION_ROLE_ARN }}
-EOP
-task_role_arn = <<EOP
-${{ secrets.TASK_ROLE_ARN }}
-EOP
-app_image = "${{ env.IMAGE_URI }}"
-grafana_admin_password = <<EOP
-${{ secrets.GRAFANA_ADMIN_PASSWORD }}
-EOP
-grafana_image = "grafana/grafana:latest"
-ecs_cluster_id = <<EOP
-${{ secrets.ECS_CLUSTER_ID }}
-EOP
-EOF
-
       - name: Terraform Destroy
         run: |
           cd ${{ env.TERRAFORM_DIR }}
-          terraform destroy -auto-approve
+          terraform destroy -auto-approve \
+            -var="db_password=${{ secrets.DB_PASSWORD }}" \
+            -var="execution_role_arn=${{ secrets.EXECUTION_ROLE_ARN }}" \
+            -var="task_role_arn=${{ secrets.TASK_ROLE_ARN }}" \
+            -var="grafana_admin_password=${{ secrets.GRAFANA_ADMIN_PASSWORD }}" \
+            -var="grafana_image=grafana/grafana:latest" \
+            -var="ecs_cluster_id=${{ secrets.ECS_CLUSTER_ID }}"
 
