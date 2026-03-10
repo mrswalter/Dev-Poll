@@ -1,17 +1,28 @@
+############################################
 # ALB Security Group
-
+############################################
 resource "aws_security_group" "alb_sg" {
-  name        = "${var.project_name}-alb-sg"
-  description = "Allow HTTP/HTTPS inbound ALB SG"
+  name_prefix = "dplbsg"
+  description = "Allow HTTP/HTTPS inbound to ALB"
   vpc_id      = var.vpc_id
 
+  # ALB listens on 80 (and optionally 443)
   ingress {
-    description = "HTTP from anywhere"
+    description = "Allow HTTP from anywhere"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
     cidr_blocks = var.lb_ingress_cidrs
   }
+
+  # Optional HTTPS support
+  # ingress {
+  #   description = "Allow HTTPS from anywhere"
+  #   from_port   = 443
+  #   to_port     = 443
+  #   protocol    = "tcp"
+  #   cidr_blocks = var.lb_ingress_cidrs
+  # }
 
   egress {
     from_port   = 0
@@ -19,22 +30,23 @@ resource "aws_security_group" "alb_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  tags = { Name = "${var.project_name}-alb-sg" }
+
+  tags = {
+    Name = "${var.project_name}-alb-sg"
+  }
 }
-# output "alb_sg_id" {
-#   description = "Security group ID for the ALB"
-#   value       = aws_security_group.alb.id
-# }
 
+############################################
 # ECS Security Group
-
+############################################
 resource "aws_security_group" "ecs_sg" {
-  name        = "${var.project_name}-ecs-sg"
-  description = "Allow traffic from ALB"
+  name_prefix = "ecssg" #name        = "${var.project_name}-ecs-sg"
+  description = "Allow traffic from ALB to ECS tasks"
   vpc_id      = var.vpc_id
 
+  # ECS tasks listen on var.app_port (8000)
   ingress {
-    description     = "Allow traffic from ALB"
+    description     = "Allow ALB to reach ECS tasks"
     from_port       = var.app_port
     to_port         = var.app_port
     protocol        = "tcp"
@@ -47,18 +59,22 @@ resource "aws_security_group" "ecs_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  tags = { Name = "${var.project_name}-ecs-sg" }
+
+  tags = {
+    Name = "${var.project_name}-ecs-sg"
+  }
 }
 
+############################################
 # RDS Security Group
-
+############################################
 resource "aws_security_group" "rds_sg" {
-  name        = "${var.project_name}-rds-sg"
-  description = "Allow DB access from ECS"
+  name_prefix = "rdssg" #name        = "${var.project_name}-rds-sg"
+  description = "Allow DB access from ECS tasks"
   vpc_id      = var.vpc_id
 
   ingress {
-    description     = "Allows MySQL from ECS"
+    description     = "Allow DB access from ECS"
     from_port       = var.db_port
     to_port         = var.db_port
     protocol        = "tcp"
@@ -71,38 +87,15 @@ resource "aws_security_group" "rds_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  tags = { Name = "${var.project_name}-rds-sg" }
+
+  tags = {
+    Name = "${var.project_name}-rds-sg"
+  }
 }
 
-# resource "aws_security_group" "alb" {
-#   name        = "${var.project_name}-alb-sg"
-#   description = "Allow HTTP/HTTPS"
-#   vpc_id      = var.vpc_id
-
-#   ingress {
-#     from_port   = 80
-#     to_port     = 80
-#     protocol    = "tcp"
-#     cidr_blocks = ["0.0.0.0/0"]
-#   }
-
-#   egress {
-#     from_port   = 0
-#     to_port     = 0
-#     protocol    = "-1"
-#     cidr_blocks = ["0.0.0.0/0"]
-#   }
-# }
-
-# output "alb_sg_id" {
-#   value = aws_security_group.alb.id
-# }
-
-# # output "ecs_sg_id" {
-# #   value = aws_security_group.ecs_sg.id
-# # }
-
-
+############################################
+# Prometheus SG
+############################################
 resource "aws_security_group" "prometheus" {
   name   = "prometheus_sg"
   vpc_id = var.vpc_id
@@ -122,6 +115,9 @@ resource "aws_security_group" "prometheus" {
   }
 }
 
+############################################
+# Grafana SG
+############################################
 resource "aws_security_group" "grafana" {
   name   = "grafana-sg"
   vpc_id = var.vpc_id
@@ -141,8 +137,11 @@ resource "aws_security_group" "grafana" {
   }
 }
 
+############################################
+# EFS SG
+############################################
 resource "aws_security_group" "efs" {
-  name        = "${var.project_name}-efs-sg"
+  name_prefix = "efs-sg" #name        = "${var.project_name}-efs-sg"
   description = "Security group for EFS"
   vpc_id      = var.vpc_id
 

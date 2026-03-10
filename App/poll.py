@@ -1,5 +1,6 @@
 import os
 import logging
+import time
 from flask import Flask, request, jsonify, render_template
 import psycopg2
 from prometheus_client import Counter, generate_latest, CONTENT_TYPE_LATEST
@@ -17,22 +18,42 @@ vote_counter = Counter("votes_total", "Total number of votes", ["choice"])
 # 🔹 Environment variables
 DB_HOST = os.getenv("DB_HOST")
 DB_USER = os.getenv("DB_USER")
-DB_PASS = os.getenv("DB_PASS")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_NAME = os.getenv("DB_NAME", "polls")
+
+# 🔹 Validate required env vars early
+missing = [k for k, v in {
+    "DB_HOST": DB_HOST,
+    "DB_USER": DB_USER,
+    "DB_PASSWORD": DB_PASSWORD,
+}.items() if not v]
+
+if missing:
+    raise RuntimeError(f"Missing required env vars: {missing}")
+
+logger.info("Environment variables loaded successfully.")
 
 # 🔹 Flask app
 app = Flask(__name__, template_folder="templates", static_folder="statics")
 
-# 🔹 Database connection
+# 🔹 Database connection with retry logic
 def get_conn():
-    conn = psycopg2.connect(
-        host=DB_HOST,
-        user=DB_USER,
-        password=DB_PASS,
-        dbname=DB_NAME
-    )
-    conn.autocommit = True
-    return conn
+    for attempt in range(5):
+        try:
+            conn = psycopg2.connect(
+                host=DB_HOST,
+                user=DB_USER,
+                password=DB_PASSWORD,
+                dbname=DB_NAME
+            )
+            conn.autocommit = True
+            logger.info("Database connection established.")
+            return conn
+        except psycopg2.OperationalError as e:
+            logger.error(f"DB connection failed (attempt {attempt+1}/5): {e}")
+            time.sleep(2)
+
+    raise psycopg2.OperationalError("Unable to connect to the database after retries.")
 
 # 🔹 Initialize DB
 def init_db():
@@ -46,6 +67,7 @@ def init_db():
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(sql)
+    logger.info("Database initialized successfully.")
 
 # 🔹 Routes
 @app.route("/")
@@ -106,6 +128,6 @@ def info():
 
 # 🔹 Entry point
 if __name__ == "__main__":
-    init_db()
+    logger.info("Starting Poll application...")
+    init_db()  # Only runs after DB is confirmed reachable
     app.run(host="0.0.0.0", port=8000)
-

@@ -21,3 +21,24 @@ resource "aws_efs_mount_target" "prometheus" {
   security_groups = [var.efs_sg_id]
 }
 
+resource "aws_efs_access_point" "prometheus_config" {
+  file_system_id = aws_efs_file_system.prometheus.id
+
+  posix_user {
+    uid = 1000
+    gid = 1000
+  }
+
+  root_directory {
+    path = "/config"
+    creation_info {
+      owner_uid   = 1000
+      owner_gid   = 1000
+      permissions = "755"
+    }
+  }
+
+  tags = {
+    Name = "prometheus-config-access-point"
+  }
+}
