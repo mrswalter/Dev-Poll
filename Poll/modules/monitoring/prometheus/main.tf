@@ -5,27 +5,36 @@ resource "aws_ecs_task_definition" "prometheus" {
   cpu                      = "256"
   memory                   = "512"
 
+  execution_role_arn = var.execution_role_arn # Already present
+  task_role_arn      = var.task_role_arn      # ✅ Add this line
+
   container_definitions = jsonencode([
     {
-      name      = "prometheus",
-      image     = "prom/prometheus:latest",
-      essential = true,
+      name      = "prometheus"
+      image     = "prom/prometheus:latest"
+      essential = true
       portMappings = [{
-        containerPort = 9090,
+        containerPort = 9090
         protocol      = "tcp"
-      }],
+      }]
       mountPoints = [{
-        sourceVolume  = "prometheus-config",
+        sourceVolume  = "prometheus-config"
         containerPath = "/etc/prometheus"
+        readOnly      = false
       }]
     }
   ])
 
   volume {
     name = "prometheus-config"
+
     efs_volume_configuration {
-      file_system_id = var.prometheus_efs_id
-      root_directory = "/config"
+      file_system_id     = var.prometheus_efs_id
+      transit_encryption = "ENABLED"
+      authorization_config {
+        access_point_id = var.prometheus_config_access_point_id
+        iam             = "ENABLED"
+      }
     }
   }
 }

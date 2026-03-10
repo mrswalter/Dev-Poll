@@ -1,0 +1,43 @@
+{
+  "family": "prometheus",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::514670561567:role/devops-poll-ecs-execution-role",
+  "taskRoleArn": "arn:aws:iam::514670561567:role/devops-poll-ecs-task-role",
+  "containerDefinitions": [
+    {
+      "name": "prometheus",
+      "image": "514670561567.dkr.ecr.us-east-1.amazonaws.com/prometheus:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 9090,
+          "protocol": "tcp"
+        }
+      ],
+      "mountPoints": [
+        {
+          "sourceVolume": "prometheus-config",
+          "containerPath": "/etc/prometheus",
+          "readOnly": false
+        }
+      ]
+    }
+  ],
+  "volumes": [
+    {
+      "name": "prometheus-config",
+      "efsVolumeConfiguration": {
+        "fileSystemId": "fs-06b4b993ac1220afe",
+        "rootDirectory": "/",
+        "transitEncryption": "ENABLED",
+        "authorizationConfig": {
+          "accessPointId": "fsap-03fe08540b13e1a35",
+          "iam": "ENABLED"
+        }
+      }
+    }
+  ]
+}

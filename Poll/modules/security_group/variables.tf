@@ -11,7 +11,7 @@ variable "app_port" { type = number }
 
 variable "db_port" {
   type    = number
-  default = 3306
+  default = 5432 #3306
 }
 variable "lb_ingress_cidrs" {
   type    = list(string)

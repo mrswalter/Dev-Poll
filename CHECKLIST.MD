@@ -47,3 +47,10 @@ Add the following in repo → Settings → Secrets and variables → Actions:
 🔹 README.md
 - Replace placeholders in setup steps with your actual values.
 
+SANITY CHECKS = SUCCESSFUL DEPLOYMENT
+If you want, we can do a quick sanity check together:
+• 	Hit the ALB DNS name in your browser
+• 	Check ECS → Services → devops-poll → Tasks → Running
+• 	Check CloudWatch logs for the app container
+• 	Check the target group health status
+But the fact that the deployment shows success means the infrastructure is finally behaving exactly the way you designed it.

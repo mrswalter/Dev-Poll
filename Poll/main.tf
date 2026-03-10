@@ -82,26 +82,35 @@ module "ecs_service" {
   db_name          = var.db_name
   db_user          = var.db_username
   db_password      = var.db_password
-  db_port          = module.rds.db_port
-  ecs_sg_id        = module.security_group.ecs_sg_id
-  ecs_cluster_id   = module.ecs_cluster.ecs_cluster_id
+  #db_port          = module.rds.db_port
+  ecs_sg_id      = module.security_group.ecs_sg_id
+  ecs_cluster_id = module.ecs_cluster.ecs_cluster_id
   #db_host = module.rds.db_host
   #task_role_arn = var.task_role_arn
-  execution_role_arn = module.iam.execution_role_arn
-  task_role_arn      = module.iam.task_role_arn
-  depends_on         = [module.alb, module.rds, module.ecs_cluster, module.iam]
+  execution_role_arn                = module.iam.execution_role_arn
+  task_role_arn                     = module.iam.task_role_arn
+  prometheus_efs_id                 = module.efs.prometheus_efs_id
+  prometheus_image                  = var.prometheus_image
+  prometheus_config_access_point_id = module.efs.prometheus_config_access_point_id
+  depends_on                        = [module.rds, module.alb, module.ecs_cluster, module.iam, module.efs]
 }
 
 
 module "iam" {
-  source       = "./modules/iam"
-  project_name = var.project_name
+  source                             = "./modules/iam"
+  project_name                       = var.project_name
+  prometheus_config_access_point_arn = module.efs.prometheus_config_access_point_arn
+  depends_on                         = [module.efs]
 }
 
-resource "aws_cloudwatch_log_group" "poll_app" {
-  name              = "/ecs/poll-app"
+resource "aws_cloudwatch_log_group" "poll_app_v3" {
+  name              = "/ecs/poll-app_v3"
   retention_in_days = 7
 }
+
+# data "aws_cloudwatch_log_group" "poll_app_v2" {
+#   name = "/ecs/poll-app_v2"
+# }
 
 module "efs" {
   source              = "./modules/efs"
@@ -109,14 +118,18 @@ module "efs" {
   efs_sg_id           = module.security_group.efs_sg_id
 }
 
+
 module "prometheus" {
-  source             = "./modules/monitoring/prometheus"
-  ecs_cluster_id     = module.ecs_cluster.ecs_cluster_id
-  private_subnets    = module.vpc.private_subnets
-  prometheus_efs_id  = module.efs.prometheus_efs_id
-  prometheus_sg_id   = module.security_group.prometheus_sg_id
-  execution_role_arn = module.iam.execution_role_arn
-  task_role_arn      = module.iam.task_role_arn
+  source                            = "./modules/monitoring/prometheus"
+  ecs_cluster_id                    = module.ecs_cluster.ecs_cluster_id
+  private_subnets                   = module.vpc.private_subnets
+  prometheus_efs_id                 = module.efs.prometheus_efs_id
+  prometheus_sg_id                  = module.security_group.prometheus_sg_id
+  execution_role_arn                = module.iam.execution_role_arn
+  task_role_arn                     = module.iam.task_role_arn
+  prometheus_config_access_point_id = module.efs.prometheus_config_access_point_id
+
+  depends_on = [module.efs, module.ecs_cluster, module.iam]
 }
 
 module "grafana" {

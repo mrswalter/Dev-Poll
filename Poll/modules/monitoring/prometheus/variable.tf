@@ -4,4 +4,5 @@ variable "prometheus_efs_id" {}
 variable "prometheus_sg_id" {}
 variable "execution_role_arn" {}
 variable "task_role_arn" {}
+variable "prometheus_config_access_point_id" {}
 

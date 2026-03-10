@@ -134,11 +134,9 @@ variable "grafana_admin_password" {
 #   type        = string
 # }
 
-# 🔹 Prometheus
-# variable "prometheus_sg_id" {
-#   description = "Security Group ID for Prometheus ECS service"
-#   type        = string
-# }
+variable "prometheus_image" {
+  default = "514670561567.dkr.ecr.us-east-1.amazonaws.com/prometheus:latest" #"prom/prometheus:latest"
+}
 
 # # 🔹 EFS
 # variable "efs_sg_id" {
