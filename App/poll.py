@@ -8,7 +8,7 @@ from prometheus_client import Counter, generate_latest, CONTENT_TYPE_LATEST
 # 🔹 Logging setup
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s"
+    format="%(asctime)s [%(levelname)s] %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -22,11 +22,15 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_NAME = os.getenv("DB_NAME", "polls")
 
 # 🔹 Validate required env vars early
-missing = [k for k, v in {
-    "DB_HOST": DB_HOST,
-    "DB_USER": DB_USER,
-    "DB_PASSWORD": DB_PASSWORD,
-}.items() if not v]
+missing = [
+    k
+    for k, v in {
+        "DB_HOST": DB_HOST,
+        "DB_USER": DB_USER,
+        "DB_PASSWORD": DB_PASSWORD,
+    }.items()
+    if not v
+]
 
 if missing:
     raise RuntimeError(f"Missing required env vars: {missing}")
@@ -34,7 +38,12 @@ if missing:
 logger.info("Environment variables loaded successfully.")
 
 # 🔹 Flask app
-app = Flask(__name__, template_folder="templates", static_folder="statics")
+app = Flask(
+    __name__,
+    template_folder="templates",
+    static_folder="statics",
+)
+
 
 # 🔹 Database connection with retry logic
 def get_conn():
@@ -44,7 +53,7 @@ def get_conn():
                 host=DB_HOST,
                 user=DB_USER,
                 password=DB_PASSWORD,
-                dbname=DB_NAME
+                dbname=DB_NAME,
             )
             conn.autocommit = True
             logger.info("Database connection established.")
@@ -53,15 +62,18 @@ def get_conn():
             logger.error(f"DB connection failed (attempt {attempt+1}/5): {e}")
             time.sleep(2)
 
-    raise psycopg2.OperationalError("Unable to connect to the database after retries.")
+    raise psycopg2.OperationalError(
+        "Unable to connect to the database after retries."
+    )
+
 
 # 🔹 Initialize DB
 def init_db():
     sql = """
     CREATE TABLE IF NOT EXISTS votes (
-      id BIGSERIAL PRIMARY KEY,
-      choice VARCHAR(64) NOT NULL,
-      voted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        id BIGSERIAL PRIMARY KEY,
+        choice VARCHAR(64) NOT NULL,
+        voted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     """
     with get_conn() as conn:
@@ -69,10 +81,12 @@ def init_db():
             cur.execute(sql)
     logger.info("Database initialized successfully.")
 
+
 # 🔹 Routes
 @app.route("/")
 def index():
     return render_template("index.html")
+
 
 @app.route("/vote", methods=["POST"])
 def vote():
@@ -81,6 +95,7 @@ def vote():
     if not choice or len(choice) > 64:
         logger.warning(f"Invalid vote attempt: {payload}")
         return jsonify({"error": "Invalid choice"}), 400
+
     try:
         with get_conn() as conn:
             with conn.cursor() as cur:
@@ -91,6 +106,7 @@ def vote():
     except Exception as e:
         logger.error(f"Vote failed: {e}")
         return jsonify({"error": "Vote failed"}), 500
+
 
 @app.route("/results", methods=["GET"])
 def results():
@@ -103,6 +119,7 @@ def results():
     except Exception as e:
         logger.error(f"Failed to fetch results: {e}")
         return jsonify({"error": "Failed to fetch results"}), 500
+
 
 @app.route("/health", methods=["GET"])
 def health():
@@ -120,16 +137,14 @@ def health():
 def metrics():
     return generate_latest(), 200, {"Content-Type": CONTENT_TYPE_LATEST}
 
+
 @app.route("/info")
 def info():
-    return jsonify({
-        "version": "1.0.0",
-        "status": "running"
-    })
+    return jsonify({"version": "1.0.0", "status": "running"})
+
 
 # 🔹 Entry point
 if __name__ == "__main__":
     logger.info("Starting Poll application...")
     init_db()  # Only runs after DB is confirmed reachable
     app.run(host="0.0.0.0", port=8000)
-    
