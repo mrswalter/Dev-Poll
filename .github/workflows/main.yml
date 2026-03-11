@@ -1,0 +1,133 @@
+name: CI/CD Pipeline - Deploy to ECS
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: 514670561567.dkr.ecr.us-east-1.amazonaws.com
+  ECR_REPOSITORY: devops-poll
+  ECS_CLUSTER: devops-poll-cluster
+  ECS_SERVICE: devops-poll-service
+  TASK_FAMILY: devops-poll-task
+
+jobs:
+  build-test-scan-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # -----------------------------
+      # CHECKOUT
+      # -----------------------------
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # -----------------------------
+      # LINTING
+      # -----------------------------
+      - name: Run Linter
+        run: |
+          pip install flake8
+          flake8 .
+
+      # -----------------------------
+      # UNIT TESTS
+      # -----------------------------
+      - name: Run Unit Tests
+        run: |
+          pip install -r requirements.txt
+          pytest -q
+
+      # -----------------------------
+      # AWS CREDENTIALS
+      # -----------------------------
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      # -----------------------------
+      # SNYK SECURITY SCANS
+      # -----------------------------
+      - name: Snyk Dependency Scan
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
+
+      - name: Snyk Container Scan
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: $ECR_REPOSITORY:latest
+          args: --file=Dockerfile
+
+      # -----------------------------
+      # DOCKER BUILD & PUSH
+      # -----------------------------
+      - name: Build Docker image
+        run: |
+          docker build -t $ECR_REPOSITORY .
+          docker tag $ECR_REPOSITORY:latest $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+      - name: Push image to ECR
+        run: |
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+      # -----------------------------
+      # TERRAFORM (OPTIONAL)
+      # -----------------------------
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+
+      # Uncomment to enable auto-apply
+      # - name: Terraform Apply
+      #   run: terraform apply -auto-approve tfplan
+
+      # -----------------------------
+      # ECS DEPLOYMENT
+      # -----------------------------
+      - name: Render new ECS task definition
+        id: taskdef
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ecs-task-definition.json
+          container-name: app
+          image: $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+      - name: Deploy updated task definition to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.taskdef.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+
+      # -----------------------------
+      # SLACK NOTIFICATION (OPTIONAL)
+      # -----------------------------
+      # - name: Notify Slack
+      #   uses: slackapi/slack-github-action@v1.24.0
+      #   with:
+      #     payload: |
+      #       {
+      #         "text": "Deployment to ECS succeeded for devops-poll!"
+      #       }
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
