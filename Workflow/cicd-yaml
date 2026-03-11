@@ -3,6 +3,9 @@ name: CI/CD Pipeline - Deploy to ECS
 on:
   push:
     branches: [ "master" ]
+  pull_request:
+    branches: [ "main" ]
+
 
 env:
   AWS_REGION: us-east-1
