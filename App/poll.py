@@ -59,7 +59,9 @@ def get_conn():
             logger.info("Database connection established.")
             return conn
         except psycopg2.OperationalError as e:
-            logger.error(f"DB connection failed (attempt {attempt+1}/5): {e}")
+            logger.error(
+                f"DB connection failed (attempt {attempt+1}/5): {e}"
+            )
             time.sleep(2)
 
     raise psycopg2.OperationalError(
@@ -92,19 +94,27 @@ def index():
 def vote():
     payload = request.get_json(silent=True) or {}
     choice = payload.get("choice")
+
     if not choice or len(choice) > 64:
-        logger.warning(f"Invalid vote attempt: {payload}")
+        logger.warning(
+            f"Invalid vote attempt: {payload}"
+        )
         return jsonify({"error": "Invalid choice"}), 400
 
     try:
         with get_conn() as conn:
             with conn.cursor() as cur:
-                cur.execute("INSERT INTO votes (choice) VALUES (%s)", (choice,))
+                cur.execute(
+                    "INSERT INTO votes (choice) VALUES (%s)",
+                    (choice,),
+                )
         vote_counter.labels(choice=choice).inc()
         logger.info(f"Vote recorded: {choice}")
         return jsonify({"success": True})
     except Exception as e:
-        logger.error(f"Vote failed: {e}")
+        logger.error(
+            f"Vote failed: {e}"
+        )
         return jsonify({"error": "Vote failed"}), 500
 
 
@@ -113,11 +123,15 @@ def results():
     try:
         with get_conn() as conn:
             with conn.cursor() as cur:
-                cur.execute("SELECT choice, COUNT(*) FROM votes GROUP BY choice")
+                cur.execute(
+                    "SELECT choice, COUNT(*) FROM votes GROUP BY choice"
+                )
                 rows = cur.fetchall()
         return jsonify({k: v for k, v in rows})
     except Exception as e:
-        logger.error(f"Failed to fetch results: {e}")
+        logger.error(
+            f"Failed to fetch results: {e}"
+        )
         return jsonify({"error": "Failed to fetch results"}), 500
 
 
@@ -129,7 +143,9 @@ def health():
                 cur.execute("SELECT 1")
         return "OK", 200
     except Exception as e:
-        logger.error(f"Health check failed: {e}")
+        logger.error(
+            f"Health check failed: {e}"
+        )
         return "DB ERROR", 500
 
 
