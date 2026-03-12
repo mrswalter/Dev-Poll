@@ -9,7 +9,7 @@ on:
 env:
   AWS_REGION: us-east-1
   ECR_REGISTRY: 514670561567.dkr.ecr.us-east-1.amazonaws.com
-  ECR_REPOSITORY: devops-poll
+  ECR_REPOSITORY: poll-app
   ECS_CLUSTER: devops-poll-cluster
   ECS_SERVICE: devops-poll-service
   TASK_FAMILY: devops-poll-task
@@ -72,7 +72,7 @@ jobs:
       # SNYK SECURITY SCANS
       # -----------------------------
       - name: Snyk Dependency Scan
-        uses: snyk/actions/node@master
+        uses: snyk/actions/python@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
