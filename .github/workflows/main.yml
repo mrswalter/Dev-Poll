@@ -42,6 +42,7 @@ jobs:
           pip install pytest
           pytest -q || echo "No tests found, skipping."
 
+
       # -----------------------------
       # AWS CREDENTIALS
       # -----------------------------
@@ -54,6 +55,18 @@ jobs:
 
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
+
+      # -----------------------------
+      # DOCKER BUILD & PUSH
+      # -----------------------------
+      - name: Build Docker image
+        run: |
+          docker build -t $ECR_REPOSITORY .
+          docker tag $ECR_REPOSITORY:latest $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+      - name: Push image to ECR
+        run: |
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
       # -----------------------------
       # SNYK SECURITY SCANS
@@ -73,17 +86,17 @@ jobs:
           image: $ECR_REPOSITORY:latest
           args: --file=Dockerfile
 
-      # -----------------------------
-      # DOCKER BUILD & PUSH
-      # -----------------------------
-      - name: Build Docker image
-        run: |
-          docker build -t $ECR_REPOSITORY .
-          docker tag $ECR_REPOSITORY:latest $ECR_REGISTRY/$ECR_REPOSITORY:latest
+      # # -----------------------------
+      # # DOCKER BUILD & PUSH
+      # # -----------------------------
+      # - name: Build Docker image
+      #   run: |
+      #     docker build -t $ECR_REPOSITORY .
+      #     docker tag $ECR_REPOSITORY:latest $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
-      - name: Push image to ECR
-        run: |
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+      # - name: Push image to ECR
+      #   run: |
+      #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
       # -----------------------------
       # TERRAFORM (OPTIONAL)
@@ -132,5 +145,6 @@ jobs:
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
 
 
