@@ -92,17 +92,16 @@ jobs:
           image: $ECR_REPOSITORY:latest
           args: --file=Dockerfile
 
-      # # -----------------------------
-      # # DOCKER BUILD & PUSH
-      # # -----------------------------
-      # - name: Build Docker image
-      #   run: |
-      #     docker build -t $ECR_REPOSITORY .
-      #     docker tag $ECR_REPOSITORY:latest $ECR_REGISTRY/$ECR_REPOSITORY:latest
-
-      # - name: Push image to ECR
-      #   run: |
-      #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+      # -----------------------------
+      # SNYK IAC (TERRAFORM) SCAN
+      # -----------------------------
+      - name: Snyk IaC Scan (Terraform)
+        uses: snyk/actions/iac@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
+          args: --severity-threshold=medium    
 
       # -----------------------------
       # TERRAFORM (OPTIONAL)
