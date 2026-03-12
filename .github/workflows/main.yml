@@ -77,6 +77,12 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
+          args: >
+            --file=requirements.txt
+            --package-manager=pip
+            --command=python3
+            --skip-unresolved
+
 
       - name: Snyk Container Scan
         uses: snyk/actions/docker@master
